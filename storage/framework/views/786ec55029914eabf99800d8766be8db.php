@@ -1,0 +1,1 @@
+<footer class="footer text-right"> <?php echo e(trans('words.copyright')); ?> © <?php echo e(date('Y')); ?> <a href="http://www.dextratechnologies.com" target="_blank">dextratechnologies.com</a>. <?php echo e(trans('words.all_rights')); ?>. </footer><?php /**PATH /home/dextragr/public_html/realestate.dextragroups.com/resources/views/admin/copyright.blade.php ENDPATH**/ ?>
