@@ -27,7 +27,7 @@ class IndexController extends Controller
         $type_list= Type::where('status',1)->orderby('type_name')->take(8)->get();
 
         //Latest Property
-        $latest_list= Property::with(['types', 'locations', 'users'])->where('status',1)->orderby('id','DESC')->limit(10)->get();
+        $latest_list= Property::with(['types', 'locations', 'users'])->where('status',1)->where('approval_status','approved')->orderby('id','DESC')->limit(10)->get();
 
         //Trending Property        
         $trending_start_date = date('Y-m-d', strtotime('today - 30 days'));
@@ -37,21 +37,34 @@ class IndexController extends Controller
                 ->select('post_views.post_id','post_views.post_type','property.id')
                 ->join('property','property.id','=','post_views.post_id')
                 ->where('property.status',1)
+                ->where('property.approval_status','approved')
                 ->whereBetween('post_views.date', array(strtotime($trending_start_date), strtotime($trending_end_date)))
                 ->selectRaw('SUM(post_views) as total_views')
                 ->groupBy('property.id','post_views.post_id','post_views.post_type')
                 ->orderby('total_views','DESC')
                 ->limit(10)
                 ->get();
+
+        $banners = DB::table('banners')
+                ->where('status', 1)
+                ->where(function ($query) {
+                    $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+                })
+                ->where(function ($query) {
+                    $query->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+                })
+                ->inRandomOrder()
+                ->limit(3)
+                ->get();
          
 
-        return view('pages.index',compact('type_list','latest_list','trending_list'));              
+        return view('pages.index',compact('banners','type_list','latest_list','trending_list','banners'));              
          
     }
 
     public function latest()
     {
-        $property_list= Property::with(['types', 'locations', 'users'])->where('status',1)->orderby('id','DESC')->limit(12)->get();
+        $property_list= Property::with(['types', 'locations', 'users'])->where('status',1)->where('approval_status','approved')->orderby('id','DESC')->limit(12)->get();
 
         return view('pages.home.latest',compact('property_list'));   
     }
@@ -65,6 +78,7 @@ class IndexController extends Controller
                 ->select('post_views.post_id','post_views.post_type','property.id')
                 ->join('property','property.id','=','post_views.post_id')
                 ->where('property.status',1)
+                ->where('property.approval_status','approved')
                 ->whereBetween('post_views.date', array(strtotime($trending_start_date), strtotime($trending_end_date)))
                 ->selectRaw('SUM(post_views) as total_views')
                 ->groupBy('property.id','post_views.post_id','post_views.post_type')

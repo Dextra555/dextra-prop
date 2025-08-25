@@ -276,7 +276,13 @@ class UserPropertyController extends Controller
     {  
         $user_id = Auth::User()->id;
 
-        $favourites_list = Favourite::where('user_id',$user_id)->orderBy('id','DESC')->paginate(12);
+        $favourites_list = Favourite::join('property', 'favourite.post_id', '=', 'property.id')
+            ->where('favourite.user_id', $user_id)
+            ->where('property.status', 1)
+            ->where('property.approval_status', 'approved')
+            ->select('favourite.*')
+            ->orderBy('favourite.id', 'DESC')
+            ->paginate(12);
 
         $page_title=trans('words.property_text');
 

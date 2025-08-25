@@ -25,10 +25,8 @@ class SitemapController extends Controller
 
     public function sitemap_property()
     {   
-        $property_list = Property::where('status',1)->orderBy('id','DESC')->get();
+        $property_list = Property::where('status',1)->where('approval_status','approved')->orderBy('id','DESC')->get();
 
         return response()->view('pages.sitemap_property',compact('property_list'))->header('Content-Type', 'text/xml');
     }
-
-
 }

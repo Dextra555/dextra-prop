@@ -341,10 +341,7 @@ class PropertyController extends Controller
     {
         // Fetch only active and approved properties that have coordinates
         $properties = Property::where('status', 1)
-            ->where(function($q){
-                $q->where('approval_status', 'approved')
-                  ->orWhereNull('approval_status');
-            })
+            ->where('approval_status', 'approved')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->where('latitude', '!=', '')

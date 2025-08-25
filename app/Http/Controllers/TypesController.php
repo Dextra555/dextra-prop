@@ -28,7 +28,10 @@ class TypesController extends Controller
 
         $sort_by = $_GET['sort_by'] ?? 'New';
          
-        $property_list = Property::with(['types', 'locations', 'users'])->where('status', 1)->where('type_id',$type_id);
+        $property_list = Property::with(['types', 'locations', 'users'])
+            ->where('status', 1)
+            ->where('approval_status','approved')
+            ->where('type_id',$type_id);
 
         switch ($sort_by) {
             case 'Old':
