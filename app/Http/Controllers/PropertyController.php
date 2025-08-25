@@ -25,7 +25,7 @@ class PropertyController extends Controller
 
         $sort_by = $request->input('sort_by', 'New');
          
-        $property_list = Property::where('status', 1);
+        $property_list = Property::where('status', 1)->where('approval_status','approved');
 
         switch ($sort_by) {
             case 'Old':
@@ -55,7 +55,7 @@ class PropertyController extends Controller
 
     public function property_details($slug,$id)
     { 
-        $property_info= Property::where('status',1)->where('id',$id)->first();
+        $property_info= Property::where('status',1)->where('approval_status','approved')->where('id',$id)->first();
 
         if(empty($property_info))
         {
@@ -66,11 +66,11 @@ class PropertyController extends Controller
 
         $gallery_images = PropertyGallery::where('post_id',$property_info->id)->orderBy('id')->get();
 
-        $latest_list= Property::where('status',1)->orderby('id','DESC')->limit(5)->get();
+        $latest_list= Property::where('status',1)->where('approval_status','approved')->orderby('id','DESC')->limit(5)->get();
 
         $type_id = $property_info->type_id;
 
-        $related_list= Property::where('status',1)->where('type_id',$type_id)->orderby('id','DESC')->limit(5)->get();
+        $related_list= Property::where('status',1)->where('approval_status','approved')->where('type_id',$type_id)->orderby('id','DESC')->limit(5)->get();
 
         $user_id = $property_info->user_id;
 
@@ -83,7 +83,7 @@ class PropertyController extends Controller
     public function property_search()
     { 
 
-        $property_query = Property::with(['types', 'locations', 'users'])->where('status', 1)
+        $property_query = Property::with(['types', 'locations', 'users'])->where('status', 1)->where('approval_status','approved')
                           ->where(function ($query) {
                             // Search text
                             if ($search_text = request()->get('search_text')) {
@@ -311,7 +311,7 @@ class PropertyController extends Controller
         
         $user_info = User::where('id', $owner_id)->first();
 
-        $property_list = $user_info->userproperty()->where('status',1)->orderby('id','DESC')->paginate(10);
+        $property_list = $user_info->userproperty()->where('status',1)->where('approval_status','approved')->orderby('id','DESC')->paginate(10);
        
         $user_plan_id=$user_info->plan_id;
         $user_plan_exp_date=$user_info->exp_date;
@@ -327,10 +327,48 @@ class PropertyController extends Controller
             }
         }
           
-        $latest_list= Property::with(['types', 'locations', 'users'])->where('status',1)->orderby('id','DESC')->limit(5)->get();
+        $latest_list= Property::with(['types', 'locations', 'users'])->where('status',1)->where('approval_status','approved')->orderby('id','DESC')->limit(5)->get();
         
          
         return view('pages.property.owner_list',compact('property_list','owner_id','latest_list'));              
          
+    }
+
+    /**
+     * Return map data for properties with coordinates
+     */
+    public function mapData(Request $request)
+    {
+        // Fetch only active and approved properties that have coordinates
+        $properties = Property::where('status', 1)
+            ->where(function($q){
+                $q->where('approval_status', 'approved')
+                  ->orWhereNull('approval_status');
+            })
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('latitude', '!=', '')
+            ->where('longitude', '!=', '')
+            ->select('id', 'slug', 'title', 'latitude', 'longitude', 'price', 'purpose', 'image')
+            ->orderBy('id', 'DESC')
+            ->limit(500)
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'id' => $p->id,
+                    'title' => $p->title,
+                    'slug' => $p->slug,
+                    'lat' => (float) $p->latitude,
+                    'lng' => (float) $p->longitude,
+                    'price' => $p->price,
+                    'purpose' => $p->purpose,
+                    'image' => url('/' . ltrim($p->image, '/')),
+                    'url' => url('properties/' . $p->slug . '/' . $p->id),
+                ];
+            });
+
+        return response()->json([
+            'data' => $properties,
+        ]);
     }
 }

@@ -52,14 +52,16 @@ $(document).ready(function () {
         todayHighlight: true
     });       
 
-    //Category
-    $('#type_id, #location_id').on('change', function () {
-        var url = $(this).val(); // get selected value
-       
-        if (url) { // require a URL
-            window.location = url; // redirect
+    // Scoped redirect-on-change (opt-in only)
+    // Use class 'jump-on-change' and optional data-url on <option> to enable redirects where needed
+    $(document).on('change', '.jump-on-change', function () {
+        var $sel = $(this);
+        var $opt = $sel.find('option:selected');
+        var url = $opt.data('url') || $sel.data('url') || '';
+        if (url) {
+            window.location = url;
+            return false;
         }
-        return false;
     });
 
     //Colors

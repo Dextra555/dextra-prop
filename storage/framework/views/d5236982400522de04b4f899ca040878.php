@@ -35,6 +35,8 @@
 
 <link rel="stylesheet" href="<?php echo e(URL::asset('site_assets/css/jquery-eu-cookie-law-popup.css')); ?>">
 
+<?php echo $__env->yieldPushContent('styles'); ?>
+
 <?php if(getcong('site_header_code')): ?>
     <?php echo stripslashes(getcong('site_header_code')); ?>
 
@@ -277,5 +279,6 @@ $("#amount_two").val("<?php echo e(html_entity_decode(getCurrencySymbols(getcong
     <?php echo stripslashes(getcong('site_footer_code')); ?>
 
 <?php endif; ?>
+<?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html><?php /**PATH C:\Users\USER\Documents\Dextra Properties\realestate.dextragroups.com\realestate.dextragroups.com\resources\views/site_app.blade.php ENDPATH**/ ?>

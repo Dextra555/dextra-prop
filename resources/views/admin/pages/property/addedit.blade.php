@@ -41,6 +41,18 @@
                             </select>
                       </div>
                   </div>
+
+                  <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">User*</label>
+                    <div class="col-sm-8">
+                        <select class="form-control select2" name="user_id" id="user_id">
+                            <option value="">Select user</option>
+                            @foreach($users as $user)
+                                <option value="{{$user->id}}" @if(isset($info->user_id) AND $user->id==$info->user_id) selected @endif>{{$user->name}} ({{$user->email}})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                  </div>
  
                   <div class="form-group row">
                     <label class="col-sm-3 col-form-label">{{trans('words.property_title')}}*  </label>

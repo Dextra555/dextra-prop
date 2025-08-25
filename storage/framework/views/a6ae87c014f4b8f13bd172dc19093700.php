@@ -1,6 +1,4 @@
-@extends("admin.admin_app")
-
-@section("content")
+<?php $__env->startSection("content"); ?>
  
 <style>
   /* Modern card styling */
@@ -122,41 +120,42 @@
                 <div class="filters-toolbar">
                   <div class="filters-card">
                     <div class="filters-inline">
-                      <a href="{{URL::to('admin/property/add')}}" class="btn btn-success btn-md" data-toggle="tooltip" title="{{trans('words.add_property')}}">
-                        <i class="fa fa-plus mr-1"></i> {{trans('words.add_property')}}
+                      <a href="<?php echo e(URL::to('admin/property/add')); ?>" class="btn btn-success btn-md" data-toggle="tooltip" title="<?php echo e(trans('words.add_property')); ?>">
+                        <i class="fa fa-plus mr-1"></i> <?php echo e(trans('words.add_property')); ?>
+
                       </a>
-                      <form method="GET" action="{{ url('/admin/property') }}" id="filterForm" class="filters-inline w-100">
+                      <form method="GET" action="<?php echo e(url('/admin/property')); ?>" id="filterForm" class="filters-inline w-100">
                         <div class="grow">
                           <select class="form-control select2" name="type_id" id="type_id">
-                            <option value="">{{trans('words.type_text')}}</option>
-                            @foreach($type_list as $type_data)
-                              <option value="{{$type_data->id}}" @if(request('type_id')==$type_data->id) selected @endif>{{$type_data->type_name}}</option>
-                            @endforeach
+                            <option value=""><?php echo e(trans('words.type_text')); ?></option>
+                            <?php $__currentLoopData = $type_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type_data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                              <option value="<?php echo e($type_data->id); ?>" <?php if(request('type_id')==$type_data->id): ?> selected <?php endif; ?>><?php echo e($type_data->type_name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                           </select>
                         </div>
                         <div class="grow">
                           <select class="form-control select2" name="location_id" id="location_id">
-                            <option value="">{{trans('words.all_location')}}</option>
-                            @foreach($location_list as $location_data)
-                              <option value="{{$location_data->id}}" @if(request('location_id')==$location_data->id) selected @endif>{{$location_data->name}}</option>
-                            @endforeach
+                            <option value=""><?php echo e(trans('words.all_location')); ?></option>
+                            <?php $__currentLoopData = $location_list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $location_data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                              <option value="<?php echo e($location_data->id); ?>" <?php if(request('location_id')==$location_data->id): ?> selected <?php endif; ?>><?php echo e($location_data->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                           </select>
                         </div>
                         <div class="grow">
                           <select class="form-control select2" name="user_id" id="user_id">
                             <option value="">All Users</option>
-                            @foreach(($users ?? []) as $u)
-                              <option value="{{$u->id}}" @if(request('user_id')==$u->id) selected @endif>{{ $u->name }}</option>
-                            @endforeach
+                            <?php $__currentLoopData = ($users ?? []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                              <option value="<?php echo e($u->id); ?>" <?php if(request('user_id')==$u->id): ?> selected <?php endif; ?>><?php echo e($u->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                           </select>
                         </div>
                         <div class="grow search-field">
                           <i class="fa fa-search"></i>
-                          <input type="text" name="s" value="{{ request('s') }}" placeholder="{{trans('words.search_by_title')}}" class="form-control">
+                          <input type="text" name="s" value="<?php echo e(request('s')); ?>" placeholder="<?php echo e(trans('words.search_by_title')); ?>" class="form-control">
                         </div>
                         <div class="filters-actions">
                           <button type="submit" class="btn btn-primary"><i class="fa fa-filter mr-1"></i> Filter</button>
-                          <a href="{{ url('/admin/property') }}" class="btn btn-ghost">Reset</a>
+                          <a href="<?php echo e(url('/admin/property')); ?>" class="btn btn-ghost">Reset</a>
                         </div>
                       </form>
                     </div>
@@ -165,8 +164,8 @@
               </div>
                 <br/>
                 <div class="row">
-                  @foreach($list as $i => $data)
-                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-6" id="card_box_id_{{$data->id}}">
+                  <?php $__currentLoopData = $list; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-6" id="card_box_id_<?php echo e($data->id); ?>">
                         <!-- Modern card -->
                         <div class="card m-b-20 property-card">
                             <div class="wall-list-item property-media">
@@ -176,57 +175,57 @@
                               </div>
                               <div class="d-flex wall_preview_item view_item_block">
                                   <ul>
-                                    <li><a href="javascript:void(0)" data-toggle="tooltip" title="{{post_views_count($data->id,"Property")}} {{trans('words.views')}}"><i class="fa fa-eye"></i></a></li>
+                                    <li><a href="javascript:void(0)" data-toggle="tooltip" title="<?php echo e(post_views_count($data->id,"Property")); ?> <?php echo e(trans('words.views')); ?>"><i class="fa fa-eye"></i></a></li>
                                   </ul>
                               </div>
-                              <p class="wall_sub_text">{{ $data->types->type_name }}</p>
+                              <p class="wall_sub_text"><?php echo e($data->types->type_name); ?></p>
                               <div class="d-flex position-absolute" style="top: 4px;right: 15px;"></div>
-                              @if(isset($data->image)) <img class="card-img-top thumb-lg img-fluid" src="{{URL::to('/'.$data->image)}}" alt=""> @endif
+                              <?php if(isset($data->image)): ?> <img class="card-img-top thumb-lg img-fluid" src="<?php echo e(URL::to('/'.$data->image)); ?>" alt=""> <?php endif; ?>
                             </div>
                             <div class="card-body p-3">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                  <span class="by_user_lg">By {{ $data->users->name }}</span>
-                                  @php $appr = $data->approval_status ?? 'pending'; @endphp
-                                  <span class="status-chip ml-2 text-uppercase {{ $appr==='approved' ? 'approved' : ($appr==='rejected' ? 'rejected' : 'pending') }}">{{$appr}}</span>
+                                  <span class="by_user_lg">By <?php echo e($data->users->name); ?></span>
+                                  <?php $appr = $data->approval_status ?? 'pending'; ?>
+                                  <span class="status-chip ml-2 text-uppercase <?php echo e($appr==='approved' ? 'approved' : ($appr==='rejected' ? 'rejected' : 'pending')); ?>"><?php echo e($appr); ?></span>
                                 </div>
                                 <!-- Active/Inactive toggle -->
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                   <span class="by_user_lg">Status:</span>
                                   <div class="custom-control custom-switch modern-switch">
-                                    <input type="checkbox" class="custom-control-input enable_disable" id="switch_status_{{$data->id}}" data-id="{{$data->id}}" @if($data->status==1) checked @endif>
-                                    <label class="custom-control-label" for="switch_status_{{$data->id}}">@if($data->status==1) Active @else Inactive @endif</label>
+                                    <input type="checkbox" class="custom-control-input enable_disable" id="switch_status_<?php echo e($data->id); ?>" data-id="<?php echo e($data->id); ?>" <?php if($data->status==1): ?> checked <?php endif; ?>>
+                                    <label class="custom-control-label" for="switch_status_<?php echo e($data->id); ?>"><?php if($data->status==1): ?> Active <?php else: ?> Inactive <?php endif; ?></label>
                                   </div>
                                 </div>
-                                <h5 class="card-title mb-2">{{ Str::limit(stripslashes($data->title),40) }}</h5>
+                                <h5 class="card-title mb-2"><?php echo e(Str::limit(stripslashes($data->title),40)); ?></h5>
                                 <div class="mb-2">
-                                  <a href="{{ url('admin/property/edit/'.$data->id) }}" class="btn btn-icon waves-effect waves-light btn-success m-r-5" data-toggle="tooltip" title="{{trans('words.edit')}}"> <i class="fa fa-edit"></i> </a>
-                                  <a href="#" class="btn btn-icon waves-effect waves-light btn-danger data_remove" data-toggle="tooltip" title="{{trans('words.remove')}}" data-id="{{$data->id}}"> <i class="fa fa-remove"></i> </a>
+                                  <a href="<?php echo e(url('admin/property/edit/'.$data->id)); ?>" class="btn btn-icon waves-effect waves-light btn-success m-r-5" data-toggle="tooltip" title="<?php echo e(trans('words.edit')); ?>"> <i class="fa fa-edit"></i> </a>
+                                  <a href="#" class="btn btn-icon waves-effect waves-light btn-danger data_remove" data-toggle="tooltip" title="<?php echo e(trans('words.remove')); ?>" data-id="<?php echo e($data->id); ?>"> <i class="fa fa-remove"></i> </a>
                                 </div>
                                 <div class="action-row">
-                                  @if(($data->approval_status ?? 'pending') !== 'approved')
-                                    <button type="button" class="btn action-btn approve-btn btn-approve" data-id="{{$data->id}}"><i class="fa fa-check"></i> Approve</button>
-                                  @endif
-                                  <button type="button" class="btn action-btn reject-btn btn-reject" data-id="{{$data->id}}"><i class="fa fa-times"></i> Reject</button>
+                                  <?php if(($data->approval_status ?? 'pending') !== 'approved'): ?>
+                                    <button type="button" class="btn action-btn approve-btn btn-approve" data-id="<?php echo e($data->id); ?>"><i class="fa fa-check"></i> Approve</button>
+                                  <?php endif; ?>
+                                  <button type="button" class="btn action-btn reject-btn btn-reject" data-id="<?php echo e($data->id); ?>"><i class="fa fa-times"></i> Reject</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    @endforeach      
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>      
                 </div>
                 <nav class="paging_simple_numbers">
-                @include('admin.pagination', ['paginator' => $list]) 
+                <?php echo $__env->make('admin.pagination', ['paginator' => $list], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?> 
                 </nav>
               </div>
             </div>
           </div>
         </div>
       </div>
-    @include("admin.copyright") 
+    <?php echo $__env->make("admin.copyright", \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?> 
   </div>    
 
-  <script src="{{ URL::asset('admin_assets/js/jquery.min.js') }}"></script>
+  <script src="<?php echo e(URL::asset('admin_assets/js/jquery.min.js')); ?>"></script>
   <!-- SweetAlert2 -->
-  <script src="{{ URL::asset('admin_assets/js/sweetalert2@11.js') }}"></script>
+  <script src="<?php echo e(URL::asset('admin_assets/js/sweetalert2@11.js')); ?>"></script>
   <script type="text/javascript">
     'use strict';
 
@@ -241,15 +240,15 @@
         $cb.prop('disabled', true);
         $.ajax({
           type: 'post',
-          url: "{{ URL::to('admin/ajax_status') }}",
+          url: "<?php echo e(URL::to('admin/ajax_status')); ?>",
           dataType: 'json',
-          data: {"_token": "{{ csrf_token() }}", id: post_id, value: state, action_for: action_name},
+          data: {"_token": "<?php echo e(csrf_token()); ?>", id: post_id, value: state, action_for: action_name},
           success: function(res){
             if(res.status=='1'){
               Swal.fire({
                 position: 'center',
                 icon: 'success',
-                title: '{{trans('words.status_changed')}}',
+                title: '<?php echo e(trans('words.status_changed')); ?>',
                 showConfirmButton: true,
                 confirmButtonColor: '#10c469',
                 background:"#1a2234",
@@ -330,14 +329,14 @@
       var action_name='property_delete';
 
       Swal.fire({
-      title: '{{trans('words.dlt_warning')}}',
-      text: "{{trans('words.dlt_warning_text')}}",
+      title: '<?php echo e(trans('words.dlt_warning')); ?>',
+      text: "<?php echo e(trans('words.dlt_warning_text')); ?>",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: '{{trans('words.dlt_confirm')}}',
-      cancelButtonText: "{{trans('words.btn_cancel')}}",
+      confirmButtonText: '<?php echo e(trans('words.dlt_confirm')); ?>',
+      cancelButtonText: "<?php echo e(trans('words.btn_cancel')); ?>",
       background:"#1a2234",
       color:"#fff"
 
@@ -347,9 +346,9 @@
 
             $.ajax({
                 type: 'post',
-                url: "{{ URL::to('admin/ajax_delete') }}",
+                url: "<?php echo e(URL::to('admin/ajax_delete')); ?>",
                 dataType: 'json',
-                data: {"_token": "{{ csrf_token() }}",id: post_id, action_for: action_name},
+                data: {"_token": "<?php echo e(csrf_token()); ?>",id: post_id, action_for: action_name},
                 success: function(res) {
 
                   if(res.status=='1')
@@ -364,7 +363,7 @@
                       Swal.fire({
                         position: 'center',
                         icon: 'success',
-                        title: '{{trans('words.deleted')}}!',
+                        title: '<?php echo e(trans('words.deleted')); ?>!',
                         showConfirmButton: true,
                         confirmButtonColor: '#10c469',
                         background:"#1a2234",
@@ -411,7 +410,7 @@
 
             Toast.fire({
               icon: 'error',
-              title: '{{trans('words.you_didnt_select')}}'
+              title: '<?php echo e(trans('words.you_didnt_select')); ?>'
             })
         }
         else
@@ -420,14 +419,14 @@
               var action_name='property_delete_selected';
 
               Swal.fire({
-              title: '{{trans('words.dlt_warning')}}',
-              text: "{{trans('words.dlt_warning_text')}}",
+              title: '<?php echo e(trans('words.dlt_warning')); ?>',
+              text: "<?php echo e(trans('words.dlt_warning_text')); ?>",
               icon: 'warning',
               showCancelButton: true,
               confirmButtonColor: '#3085d6',
               cancelButtonColor: '#d33',
-              confirmButtonText: '{{trans('words.dlt_confirm')}}',
-              cancelButtonText: "{{trans('words.btn_cancel')}}",
+              confirmButtonText: '<?php echo e(trans('words.dlt_confirm')); ?>',
+              cancelButtonText: "<?php echo e(trans('words.btn_cancel')); ?>",
               background:"#1a2234",
               color:"#fff"
 
@@ -437,9 +436,9 @@
 
                     $.ajax({
                         type: 'post',
-                        url: "{{ URL::to('admin/ajax_delete') }}",
+                        url: "<?php echo e(URL::to('admin/ajax_delete')); ?>",
                         dataType: 'json',
-                        data: {"_token": "{{ csrf_token() }}",id: post_ids, action_for: action_name},
+                        data: {"_token": "<?php echo e(csrf_token()); ?>",id: post_ids, action_for: action_name},
                         success: function(res) {
 
                           if(res.status=='1')
@@ -460,7 +459,7 @@
                               Swal.fire({
                                 position: 'center',
                                 icon: 'success',
-                                title: '{{trans('words.deleted')}}!',
+                                title: '<?php echo e(trans('words.deleted')); ?>!',
                                 showConfirmButton: true,
                                 confirmButtonColor: '#10c469',
                                 background:"#1a2234",
@@ -531,7 +530,7 @@
           
         Toast.fire({
         icon: 'success',
-        title: totalItems + ' {{trans('words.item_checked')}}'
+        title: totalItems + ' <?php echo e(trans('words.item_checked')); ?>'
       })
 
       } else if ($("input[name='post_ids[]']").prop("checked") == false) {
@@ -539,7 +538,7 @@
         
         Toast.fire({
         icon: 'success',
-        title: totalItems + ' {{trans('words.item_checked')}}'
+        title: totalItems + ' <?php echo e(trans('words.item_checked')); ?>'
       })
         
       }
@@ -568,7 +567,7 @@
       if (totalItems == 0) {
         Toast.fire({
           icon: 'success',
-          title: totalItems + ' {{trans('words.item_checked')}}'
+          title: totalItems + ' <?php echo e(trans('words.item_checked')); ?>'
         })
 
         return true;
@@ -576,7 +575,7 @@
   
       Toast.fire({
         icon: 'success',
-        title: totalItems + ' {{trans('words.item_checked')}}'
+        title: totalItems + ' <?php echo e(trans('words.item_checked')); ?>'
       })
 
   
@@ -591,9 +590,9 @@
       var post_id = $(this).data('id');
       $.ajax({
         type: 'post',
-        url: "{{ url('admin/property') }}/"+post_id+"/approve",
+        url: "<?php echo e(url('admin/property')); ?>/"+post_id+"/approve",
         dataType: 'json',
-        data: {"_token": "{{ csrf_token() }}"},
+        data: {"_token": "<?php echo e(csrf_token()); ?>"},
         success: function(res){
           if(res.status=='1'){
             Swal.fire({icon:'success', title:'Approved', background:'#1a2234', color:'#fff'}).then(()=>{ location.reload(); });
@@ -621,9 +620,9 @@
         if(result.isConfirmed && result.value){
           $.ajax({
             type: 'post',
-            url: "{{ url('admin/property') }}/"+post_id+"/reject",
+            url: "<?php echo e(url('admin/property')); ?>/"+post_id+"/reject",
             dataType: 'json',
-            data: {"_token": "{{ csrf_token() }}", reason: result.value},
+            data: {"_token": "<?php echo e(csrf_token()); ?>", reason: result.value},
             success: function(res){
               if(res.status=='1'){
                 Swal.fire({icon:'success', title:'Rejected', background:'#1a2234', color:'#fff'}).then(()=>{ location.reload(); });
@@ -637,6 +636,8 @@
     });
   </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
  
+
+<?php echo $__env->make("admin.admin_app", \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\USER\Documents\Dextra Properties\realestate.dextragroups.com\realestate.dextragroups.com\resources\views/admin/pages/property/list.blade.php ENDPATH**/ ?>

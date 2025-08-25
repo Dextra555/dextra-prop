@@ -35,6 +35,8 @@
 
 <link rel="stylesheet" href="{{ URL::asset('site_assets/css/jquery-eu-cookie-law-popup.css') }}">
 
+@stack('styles')
+
 @if(getcong('site_header_code'))
     {!!stripslashes(getcong('site_header_code'))!!}
 @endif
@@ -275,5 +277,6 @@ $("#amount_two").val("{{html_entity_decode(getCurrencySymbols(getcong('currency_
 @if(getcong('site_footer_code'))
     {!!stripslashes(getcong('site_footer_code'))!!}
 @endif
+@stack('scripts')
 </body>
 </html>

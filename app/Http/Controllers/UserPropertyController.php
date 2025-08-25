@@ -152,11 +152,23 @@ class UserPropertyController extends Controller
            
             $data_obj = Property::findOrFail($inputs['id']);
 
+            // When user edits, require re-approval
+            $data_obj->approval_status = 'pending';
+            $data_obj->rejection_reason = null;
+            $data_obj->approved_at = null;
+            $data_obj->status = 0;
+
         }else{
 
             $data_obj = new Property;
 
             $data_obj->user_id = Auth::User()->id;
+
+            // New user-created properties require admin approval
+            $data_obj->approval_status = 'pending';
+            $data_obj->rejection_reason = null;
+            $data_obj->approved_at = null;
+            $data_obj->status = 0; // invisible until approved
         } 
         
         $title_slug = Str::slug($inputs['title'], '-',null);

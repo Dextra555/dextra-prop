@@ -51,6 +51,8 @@ Route::group(['namespace' => 'App\Http\Controllers\Admin', 'prefix' => 'admin'],
     Route::get('property/add', 'PropertyController@add'); 
     Route::get('property/edit/{id}', 'PropertyController@edit');  
     Route::post('property/add_edit', 'PropertyController@addnew');
+    Route::post('property/{id}/approve', 'PropertyController@approve');
+    Route::post('property/{id}/reject', 'PropertyController@reject');
       
     Route::get('reviews', 'ReviewsController@list');
 
@@ -168,6 +170,7 @@ Route::get('properties', 'PropertyController@properties');
 Route::get('properties/owner/{id}', 'PropertyController@properties_owner');
 Route::get('properties/{slug}/{id}', 'PropertyController@property_details');
 Route::get('properties/search', 'PropertyController@property_search');
+Route::get('properties/map-data', 'PropertyController@mapData');
 Route::post('properties/contact', 'PropertyController@properties_contact');
 Route::post('properties/report', 'PropertyController@properties_report');
 

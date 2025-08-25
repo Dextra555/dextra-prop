@@ -7,6 +7,7 @@ use App\Type;
 use App\Location;
 use App\Property;
 use App\PropertyGallery;
+use App\User;
 
 
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ use Illuminate\Support\Str;
 class PropertyController extends MainAdminController
 {
 	  
-    public function list()
+    public function list(Request $request)
     { 
  
         if(Auth::User()->usertype!="Admin" AND Auth::User()->usertype!="Sub_Admin")
@@ -25,41 +26,36 @@ class PropertyController extends MainAdminController
             return redirect('dashboard');            
         }
 
-        if(isset($_GET['s']))
-        {
-            $keyword = $_GET['s'];  
-            $list = Property::where("title", "LIKE","%$keyword%")->with(['types', 'users'])->orderBy('title')->paginate(12);
+        // Combined filters: search (s), type_id, location_id, user_id
+        $query = Property::with(['types', 'users']);
 
-            $list->appends(\Request::only('s'))->links();
+        if ($request->filled('s')) {
+            $keyword = $request->get('s');
+            $query->where('title', 'LIKE', "%{$keyword}%");
         }
-        else if(isset($_GET['type_id']) AND $_GET['type_id']!="")
-        {   
-            $type_id = $_GET['type_id'];
+        if ($request->filled('type_id')) {
+            $query->where('type_id', $request->get('type_id'));
+        }
+        if ($request->filled('location_id')) {
+            $query->where('location_id', $request->get('location_id'));
+        }
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->get('user_id'));
+        }
 
-            $list = Property::where("type_id", $type_id)->with(['types', 'users'])->orderBy('title')->paginate(12);
-  
-            $list->appends(\Request::only('type_id'))->links();
-        }
-        else if(isset($_GET['location_id']) AND $_GET['location_id']!="")
-        {   
-            $location_id = $_GET['location_id'];
-
-            $list = Property::where("location_id", $location_id)->with(['types', 'users'])->orderBy('title')->paginate(12);
-  
-            $list->appends(\Request::only('location_id'))->links();
-        }      
-        else
-        {
-            $list = Property::with(['types', 'users'])->orderBy('id','DESC')->paginate(12);
-        }
+        $list = $query->orderBy('id','DESC')->paginate(12);
+        $list->appends($request->all())->links();
 
         $page_title=trans('words.property_text');
 
         $type_list = Type::orderBy('type_name')->get();
 
         $location_list = Location::orderBy('name')->get();
+        
+        // For user filter
+        $users = User::orderBy('name')->get();
           
-        return view('admin.pages.property.list',compact('page_title','list','type_list','location_list'));
+        return view('admin.pages.property.list',compact('page_title','list','type_list','location_list','users'));
     }
 
     public function add()    
@@ -75,8 +71,10 @@ class PropertyController extends MainAdminController
           $type_list = Type::orderBy('type_name')->get();
 
           $location_list = Location::orderBy('name')->get();
+          
+          $users = User::orderBy('name')->get();
            
-          return view('admin.pages.property.addedit',compact('page_title','type_list','location_list'));
+          return view('admin.pages.property.addedit',compact('page_title','type_list','location_list','users'));
         
     }
 
@@ -97,8 +95,10 @@ class PropertyController extends MainAdminController
           $type_list = Type::orderBy('type_name')->get();  
           
           $location_list = Location::orderBy('name')->get();
+         
+          $users = User::orderBy('name')->get();
         
-          return view('admin.pages.property.addedit',compact('page_title','info','type_list','location_list','gallery_images'));
+          return view('admin.pages.property.addedit',compact('page_title','info','type_list','location_list','gallery_images','users'));
         
     }
 
@@ -106,17 +106,20 @@ class PropertyController extends MainAdminController
     {  
        
        $data =  \Request::except(array('_token')) ;
-       
+       $inputs = $request->all();
+
        if(!empty($inputs['id'])){
          $rule=array(
+               'user_id' => 'required|exists:users,id',
                 'type' => 'required',
                 'title' => 'required',
                 'location' => 'required'
                 );
-         
+        
         }else
         {
             $rule=array(
+                    'user_id' => 'required|exists:users,id',
                     'type' => 'required',
                     'title' => 'required',
                     'location' => 'required',
@@ -131,21 +134,19 @@ class PropertyController extends MainAdminController
         {
                 return redirect()->back()->withErrors($validator->messages());
         } 
-        $inputs = $request->all();
-        
         if(!empty($inputs['id'])){
            
-            $data_obj = Property::findOrFail($inputs['id']);
+           $data_obj = Property::findOrFail($inputs['id']);
 
         }else{
 
             $data_obj = new Property;
-
-            $data_obj->user_id = Auth::User()->id;
         } 
 
         $title_slug = Str::slug($inputs['title'], '-',null);
         
+        // Assign property owner (required)
+        $data_obj->user_id = $inputs['user_id'];
         $data_obj->type_id = $inputs['type']; 
         $data_obj->title = addslashes($inputs['title']);
         $data_obj->slug = $title_slug;
@@ -168,12 +169,17 @@ class PropertyController extends MainAdminController
         $data_obj->floor_plan_image = $inputs['floor_plan_image'];      
          
         $data_obj->status = $inputs['status']; 
+
+        // Auto-approve when created/updated from Admin panel
+        $data_obj->approval_status = 'approved';
+        $data_obj->rejection_reason = null;
+        $data_obj->approved_at = now();
         
         $data_obj->save();
         
         
             //News Gallery Image
-            $gallery_count=count($inputs['image_gallery']);
+           $gallery_count = isset($inputs['image_gallery']) ? count($inputs['image_gallery']) : 0;
  
             if(!empty($inputs['id']))
             {
@@ -210,6 +216,80 @@ class PropertyController extends MainAdminController
             return \Redirect::back();
 
         }   
+    }
+
+    public function approve($id, Request $request)
+    {
+        if(Auth::User()->usertype!="Admin" && Auth::User()->usertype!="Sub_Admin"){
+            return response()->json(['status' => 0, 'message' => trans('words.access_denied')]);
+        }
+
+        $property = Property::with('users')->findOrFail($id);
+        $property->approval_status = 'approved';
+        $property->rejection_reason = null;
+        $property->approved_at = now();
+        $property->status = 1; // make active
+        $property->save();
+
+        // Email notify
+        try {
+            $to_name = $property->users->name ?? '';
+            $to_email = $property->users->email ?? '';
+            $subject = $property->title.' - Property Approved';
+            $data = [
+                'user_name' => $to_name,
+                'property_title' => $property->title,
+                'property_url' => url('properties/'.$property->slug.'/'.$property->id),
+                'property_image' => $property->image ? url('/'.$property->image) : null,
+            ];
+            \Mail::send('emails.property_approved', $data, function ($message) use ($subject, $to_name, $to_email) {
+                $message->from(getenv('MAIL_FROM_ADDRESS'), getcong('site_name'));
+                $message->to($to_email, $to_name)->subject($subject);
+            });
+        } catch (\Throwable $e) {
+            \Log::info($e->getMessage());
+        }
+
+        return response()->json(['status' => 1]);
+    }
+
+    public function reject($id, Request $request)
+    {
+        if(Auth::User()->usertype!="Admin" && Auth::User()->usertype!="Sub_Admin"){
+            return response()->json(['status' => 0, 'message' => trans('words.access_denied')]);
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:2000',
+        ]);
+
+        $property = Property::with('users')->findOrFail($id);
+        $property->approval_status = 'rejected';
+        $property->rejection_reason = $request->input('reason');
+        $property->approved_at = null;
+        $property->status = 0; // keep inactive
+        $property->save();
+
+        // Email notify
+        try {
+            $to_name = $property->users->name ?? '';
+            $to_email = $property->users->email ?? '';
+            $subject = $property->title.' - Property Rejected';
+            $data = [
+                'user_name' => $to_name,
+                'property_title' => $property->title,
+                'reason' => $property->rejection_reason,
+                'property_image' => $property->image ? url('/'.$property->image) : null,
+            ];
+            \Mail::send('emails.property_rejected', $data, function ($message) use ($subject, $to_name, $to_email) {
+                $message->from(getenv('MAIL_FROM_ADDRESS'), getcong('site_name'));
+                $message->to($to_email, $to_name)->subject($subject);
+            });
+        } catch (\Throwable $e) {
+            \Log::info($e->getMessage());
+        }
+
+        return response()->json(['status' => 1]);
     }
   
 }
